@@ -4,3 +4,12 @@ services:
     volumes:
       - .:/workspace:cached
     command: sleep infinity
+
+  # PostgreSQL database for our services
+  database:
+    build: ./backend-database
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    env_file:
+      - ./backend-database/.env
