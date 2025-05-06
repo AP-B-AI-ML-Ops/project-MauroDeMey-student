@@ -1,3 +1,5 @@
 *.zip
 *.csv
 .env
+/models/
+*/mlruns/
