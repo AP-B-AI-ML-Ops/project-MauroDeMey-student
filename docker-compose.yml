@@ -13,3 +13,14 @@ services:
       - postgres-data:/var/lib/postgresql/data
     env_file:
       - ./backend-database/.env
+
+  # MLFlow server for experiment tracking (uses the database)
+  experiment-tracking:
+    build: ./experiment-tracking
+    ports:
+      - 5000:5000
+    depends_on:
+      - database
+
+volumes:
+  postgres-data:
