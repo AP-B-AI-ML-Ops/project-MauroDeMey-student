@@ -1,0 +1,7 @@
+{
+  "name": "train model",
+  "dockerComposeFile": ["../../docker-compose.yml"],
+  "service": "train-devcontainer",
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspace/train"
+}
