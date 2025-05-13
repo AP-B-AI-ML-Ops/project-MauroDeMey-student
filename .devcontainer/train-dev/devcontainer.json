@@ -3,5 +3,10 @@
   "dockerComposeFile": ["../../docker-compose.yml"],
   "service": "train-devcontainer",
   "shutdownAction": "none",
-  "workspaceFolder": "/workspace/train"
+  "workspaceFolder": "/workspace/train",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-toolsai.jupyter"]
+    }
+  }
 }

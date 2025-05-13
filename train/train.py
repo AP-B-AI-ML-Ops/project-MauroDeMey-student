@@ -1,0 +1,42 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+import mlflow
+import os
+import pickle
+
+mlflow.set_tracking_uri("http://experiment-tracking:5000")
+mlflow.set_experiment("random-forest-train")
+
+
+def load_pickle(filename: str):
+    """Load an object from a pickle file."""
+    with open(filename, 'rb') as f_in:
+        return pickle.load(f_in)
+
+
+def run_train(data_path: str):
+    """Main function to run training."""
+    mlflow.sklearn.autolog()
+    # Load the preprocessed data
+    X_train, y_train = load_pickle(os.path.join(data_path, 'train.pkl'))
+    X_test, y_test = load_pickle(os.path.join(data_path, 'test.pkl'))
+
+    with mlflow.start_run():
+
+        # Initialize the Random Forest Classifier
+        rf_classifier = RandomForestClassifier(random_state=42)
+
+        # Train the model
+        rf_classifier.fit(X_train, y_train)
+
+        # Make predictions on the test set
+        y_pred = rf_classifier.predict(X_test)
+
+        # Evaluate the model
+        accuracy = accuracy_score(y_test, y_pred)
+        mlflow.log_metric("accuracy", accuracy)
+
+
+if __name__ == "__main__":
+    print("Starting training...")
+    run_train(data_path='./models')
