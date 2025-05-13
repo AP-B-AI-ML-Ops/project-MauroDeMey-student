@@ -1,3 +1,5 @@
+# pylint: disable=<W1510>
+"""Start the training process."""
 import subprocess
 
 subprocess.run("python preprocess.py", shell=True)
