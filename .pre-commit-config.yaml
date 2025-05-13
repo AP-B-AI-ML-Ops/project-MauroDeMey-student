@@ -14,20 +14,20 @@ repos:
     hooks:
       - id: black
 
-  # - repo: https://github.com/pycqa/isort
-  #   rev: 6.0.1
-  #   hooks:
-  #     - id: isort
-  #       name: isort (python)
+  - repo: https://github.com/pycqa/isort
+    rev: 6.0.1
+    hooks:
+      - id: isort
+        name: isort (python)
 
-  # - repo: local
-  #   hooks:
-  #     - id: pylint
-  #       name: pylint
-  #       entry: pylint
-  #       language: system
-  #       types: [python]
-  #       args: [
-  #           "-rn", # only display message
-  #           "--score=n", # don't display scores
-  #         ]
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        args: [
+            "-rn", # only display message
+            "--score=n", # don't display scores
+          ]
