@@ -4,6 +4,7 @@ import os
 import pickle
 
 import pandas as pd
+from prefect import flow, task
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
@@ -20,6 +21,7 @@ def read_dataframe(filename: str):
     return df
 
 
+@task
 def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder):
     """Preprocess the DataFrame."""
     # Drop rows with missing values
@@ -46,6 +48,7 @@ def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder):
     return df, ss, le
 
 
+@flow
 def run_data_prep(
     input_file: str, output_dir: str, test_size: float = 0.2, random_state: int = 42
 ):
@@ -78,7 +81,12 @@ def run_data_prep(
 
 
 if __name__ == "__main__":
-    print("Running data preparation...")
-    run_data_prep(
-        input_file="./data/healthcare-dataset-stroke-data.csv", output_dir="./models"
+    run_data_prep.serve(
+        name="data-prep-flow",
+        parameters={
+            "input_file": "./data/healthcare-dataset-stroke-data.csv",
+            "output_dir": "./models",
+            "test_size": 0.2,
+            "random_state": 42,
+        },
     )

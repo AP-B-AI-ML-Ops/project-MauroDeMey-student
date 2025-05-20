@@ -4,6 +4,7 @@ import os
 import pickle
 
 import mlflow
+from prefect import flow
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
@@ -17,6 +18,7 @@ def load_pickle(filename: str):
         return pickle.load(f_in)
 
 
+@flow
 def run_train(data_path: str):
     """Main function to run training."""
     mlflow.sklearn.autolog()
@@ -41,5 +43,4 @@ def run_train(data_path: str):
 
 
 if __name__ == "__main__":
-    print("Starting training...")
-    run_train(data_path="./models")
+    run_train.serve(name="train-flow", parameters={"data_path": "./models"})

@@ -6,6 +6,7 @@ import pickle
 
 import mlflow
 import optuna
+from prefect import flow
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
@@ -19,6 +20,7 @@ def load_pickle(filename: str):
         return pickle.load(f_in)
 
 
+@flow
 def run_optimization(data_path: str, num_trials: int):
     """Main function to run hyperparameter optimization."""
     # Load the preprocessed data
@@ -58,4 +60,6 @@ def run_optimization(data_path: str, num_trials: int):
 
 if __name__ == "__main__":
     print("Starting hyperparameter optimization...")
-    run_optimization(data_path="./models", num_trials=10)
+    run_optimization.serve(
+        name="hpo-flow", parameters={"data_path": "./models", "num_trials": 10}
+    )

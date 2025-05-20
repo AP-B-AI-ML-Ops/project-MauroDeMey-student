@@ -6,6 +6,7 @@ import pickle
 import mlflow
 from mlflow.entities import ViewType
 from mlflow.tracking import MlflowClient
+from prefect import flow, task
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
@@ -30,6 +31,7 @@ def load_pickle(filename: str):
         return pickle.load(f_in)
 
 
+@task
 def train_and_log_model(params):
     """Train a Random Forest model and log it to MLflow."""
     # Load preprocessed training and validation data
@@ -53,6 +55,7 @@ def train_and_log_model(params):
         mlflow.sklearn.log_model(rf_classifier, artifact_path="model")
 
 
+@flow
 def run_register_model(top_n: int):
     """Register the best Random Forest model from Hyperopt runs."""
     client = MlflowClient()
@@ -84,5 +87,4 @@ def run_register_model(top_n: int):
 
 
 if __name__ == "__main__":
-    print("Registering model...")
-    run_register_model(5)
+    run_register_model.serve(name="register-model-flow", parameters={"top_n": 5})

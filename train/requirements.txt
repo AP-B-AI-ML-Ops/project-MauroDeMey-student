@@ -3,3 +3,5 @@ numpy
 scikit-learn
 mlflow
 optuna
+prefect
+azureml-core

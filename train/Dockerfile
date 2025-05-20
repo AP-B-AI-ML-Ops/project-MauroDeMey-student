@@ -6,4 +6,8 @@ COPY . /
 
 RUN pip install -r ./requirements.txt --upgrade
 
-CMD [ "python", "main.py" ]
+RUN prefect config set PREFECT_API_URL=http://orchestration:4200/api
+
+RUN chmod +x ./startPoolWorkers.sh
+
+CMD [ "bash", "/startPoolWorkers.sh" ]

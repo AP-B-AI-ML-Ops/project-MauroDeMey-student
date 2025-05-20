@@ -25,5 +25,11 @@ services:
     depends_on:
       - database
 
+  # prefect server
+  orchestration:
+    build: ./orchestration
+    ports:
+      - 4200:4200
+
 volumes:
   postgres-data:
