@@ -22,7 +22,7 @@ def read_dataframe(filename: str):
 
 
 @task
-def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder):
+def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder, output_dir: str):
     """Preprocess the DataFrame."""
     # Drop rows with missing values
     df.dropna(inplace=True)
@@ -40,6 +40,7 @@ def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder):
     ]
     for col in categorical_columns:
         df[col] = le.fit_transform(df[col])
+        dump_pickle(le, os.path.join(output_dir, f"{col}_label_encoder.pkl"))
 
     # Scaling numerical features
     numerical_columns = ["age", "avg_glucose_level", "bmi"]
@@ -64,7 +65,7 @@ def run_data_prep(
     le = LabelEncoder()
 
     # Preprocess the DataFrame
-    df, ss, le = preprocess(df, ss, le)
+    df, ss, le = preprocess(df, ss, le, output_dir)
 
     # Split the dataset into training and testing sets
     X = df.drop(columns=["stroke"])
@@ -76,8 +77,6 @@ def run_data_prep(
     # Save the preprocessed data
     dump_pickle((X_train, y_train), os.path.join(output_dir, "train.pkl"))
     dump_pickle((X_test, y_test), os.path.join(output_dir, "test.pkl"))
-    dump_pickle(ss, os.path.join(output_dir, "scaler.pkl"))
-    dump_pickle(le, os.path.join(output_dir, "label_encoder.pkl"))
 
 
 if __name__ == "__main__":
