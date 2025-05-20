@@ -10,20 +10,6 @@ from prefect import flow, task
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-HPO_EXPERIMENT_NAME = "random-forest-hyperopt"
-EXPERIMENT_NAME = "random-forest-best-models"
-RF_PARAMS = [
-    "max_depth",
-    "n_estimators",
-    "min_samples_split",
-    "min_samples_leaf",
-    "random_state",
-    "n_jobs",
-]
-
-mlflow.set_tracking_uri("http://experiment-tracking:5000")
-mlflow.set_experiment(EXPERIMENT_NAME)
-
 
 def load_pickle(filename: str):
     """Load an object from a pickle file."""
@@ -32,14 +18,23 @@ def load_pickle(filename: str):
 
 
 @task
-def train_and_log_model(params):
+def train_and_log_model(params: dict):
     """Train a Random Forest model and log it to MLflow."""
+    mlflow.set_tracking_uri("http://experiment-tracking:5000")
+    mlflow.set_experiment("random-forest-best-models")
     # Load preprocessed training and validation data
     X_train, y_train = load_pickle(os.path.join("./models", "train.pkl"))
     X_test, y_test = load_pickle(os.path.join("./models", "test.pkl"))
 
     with mlflow.start_run():
-        for param in RF_PARAMS:
+        for param in [
+            "n_estimators",
+            "max_depth",
+            "min_samples_split",
+            "min_samples_leaf",
+            "random_state",
+            "n_jobs",
+        ]:
             params[param] = int(params[param])
 
         # Train the Random Forest Classifier
@@ -58,10 +53,13 @@ def train_and_log_model(params):
 @flow
 def run_register_model(top_n: int):
     """Register the best Random Forest model from Hyperopt runs."""
+    mlflow.set_tracking_uri("http://experiment-tracking:5000")
+    mlflow.set_experiment("random-forest-best-models")
+
     client = MlflowClient()
 
     # Retrieve the top_n model runs and log the models
-    experiment = client.get_experiment_by_name(HPO_EXPERIMENT_NAME)
+    experiment = client.get_experiment_by_name("random-forest-hyperopt")
     runs = client.search_runs(
         experiment_ids=experiment.experiment_id,
         run_view_type=ViewType.ACTIVE_ONLY,
@@ -69,10 +67,20 @@ def run_register_model(top_n: int):
         order_by=["metrics.accuracy DESC"],
     )
     for run in runs:
-        train_and_log_model(params=run.data.params)
+        raw_params = dict(run.data.params)
+        # Validate parameter schema
+        validated_params = {
+            "n_estimators": int(raw_params.get("n_estimators", 100)),
+            "max_depth": int(raw_params.get("max_depth", 10)),
+            "min_samples_split": int(raw_params.get("min_samples_split", 2)),
+            "min_samples_leaf": int(raw_params.get("min_samples_leaf", 1)),
+            "random_state": int(raw_params.get("random_state", 42)),
+            "n_jobs": int(raw_params.get("n_jobs", -1)),
+        }
+        train_and_log_model(params=validated_params)
 
     # Select the model with the highest test accuracy
-    experiment = client.get_experiment_by_name(EXPERIMENT_NAME)
+    experiment = client.get_experiment_by_name("random-forest-best-models")
     best_run = client.search_runs(
         experiment_ids=experiment.experiment_id,
         run_view_type=ViewType.ACTIVE_ONLY,

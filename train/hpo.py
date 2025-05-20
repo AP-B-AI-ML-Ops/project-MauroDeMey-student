@@ -10,9 +10,6 @@ from prefect import flow
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-mlflow.set_tracking_uri("http://experiment-tracking:5000")
-mlflow.set_experiment("random-forest-hyperopt")
-
 
 def load_pickle(filename: str):
     """Load an object from a pickle file."""
@@ -23,6 +20,8 @@ def load_pickle(filename: str):
 @flow
 def run_optimization(data_path: str, num_trials: int):
     """Main function to run hyperparameter optimization."""
+    mlflow.set_tracking_uri("http://experiment-tracking:5000")
+    mlflow.set_experiment("random-forest-hyperopt")
     # Load the preprocessed data
     X_train, y_train = load_pickle(os.path.join(data_path, "train.pkl"))
     X_test, y_test = load_pickle(os.path.join(data_path, "test.pkl"))
