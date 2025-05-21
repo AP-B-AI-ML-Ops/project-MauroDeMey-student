@@ -83,7 +83,7 @@ if __name__ == "__main__":
     run_data_prep.serve(
         name="data-prep-flow",
         parameters={
-            "input_file": "./data/healthcare-dataset-stroke-data.csv",
+            "input_file": "./data/stroke-data-1.csv",
             "output_dir": "./models",
             "test_size": 0.2,
             "random_state": 42,
