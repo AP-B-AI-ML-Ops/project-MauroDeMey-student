@@ -1,0 +1,7 @@
+{
+  "name": "deploy-batch",
+  "dockerComposeFile": ["../../docker-compose.yml"],
+  "service": "deploy-batch-devcontainer",
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspace/deploy-batch"
+}

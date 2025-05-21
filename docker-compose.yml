@@ -47,5 +47,20 @@ services:
     volumes:
       - ./train/models:/app/models
 
+  # deploy-batch-devcontainer:
+  #   image: mcr.microsoft.com/devcontainers/python:1-3.13-bullseye
+  #   volumes:
+  #     - .:/workspace:cached
+  #     - ./train/models:/workspace/deploy-batch/models
+  #     - ./train/data:/workspace/deploy-batch/data
+  #   command: sleep infinity
+
+  deploy-batch:
+    build: ./deploy-batch
+    volumes:
+      - ./train/models:/models
+      - ./train/data:/data
+      - ./deploy-batch/batch-output:/batch-output
+
 volumes:
   postgres-data:
