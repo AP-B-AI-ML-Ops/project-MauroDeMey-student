@@ -3,5 +3,5 @@
   "dockerComposeFile": ["../../docker-compose.yml"],
   "service": "deploy-batch-devcontainer",
   "shutdownAction": "none",
-  "workspaceFolder": "/workspace/deploy-batch"
+  "workspaceFolder": "/workspace/deploy_batch"
 }

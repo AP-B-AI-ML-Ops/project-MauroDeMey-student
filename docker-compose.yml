@@ -51,8 +51,8 @@ services:
   #   image: mcr.microsoft.com/devcontainers/python:1-3.13-bullseye
   #   volumes:
   #     - .:/workspace:cached
-  #     - ./train/models:/workspace/deploy-batch/models
-  #     - ./train/data:/workspace/deploy-batch/data
+  #     - ./train/models:/workspace/deploy_batch/models
+  #     - ./train/data:/workspace/deploy_batch/data
   #   command: sleep infinity
 
   deploy-batch:
