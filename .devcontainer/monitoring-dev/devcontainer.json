@@ -1,0 +1,12 @@
+{
+  "name": "monitoring and reporting",
+  "dockerComposeFile": ["../../docker-compose.yml"],
+  "service": "monitoring-devcontainer",
+  "shutdownAction": "none",
+  "workspaceFolder": "/workspace/monitoring",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-toolsai.jupyter"]
+    }
+  }
+}
