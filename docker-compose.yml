@@ -56,7 +56,7 @@ services:
   #   command: sleep infinity
 
   deploy-batch:
-    build: ./deploy-batch
+    build: ./deploy_batch
     volumes:
       - ./train/models:/models
       - ./train/data:/data
