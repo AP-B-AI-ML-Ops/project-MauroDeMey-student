@@ -37,7 +37,7 @@ def main_flow(
 
 if __name__ == "__main__":
     main_flow.serve(
-        name="train-flow",
+        name="main-flow",
         parameters={
             "input_file": "./data/healthcare-dataset-stroke-data.csv",
             "test_size": 0.2,
