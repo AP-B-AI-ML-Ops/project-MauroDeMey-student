@@ -6,8 +6,10 @@ import pickle
 
 import mlflow
 import pandas as pd
+from dotenv import load_dotenv
 from mlflow import MlflowClient
 from prefect import flow, task
+from sqlalchemy import create_engine, text
 
 mlflow.set_tracking_uri("http://experiment-tracking:5000")
 client = MlflowClient("http://experiment-tracking:5000")
@@ -99,9 +101,83 @@ def load_data(input_file):
     return df
 
 
+def load_db_credentials_from_env(env_path=".env"):
+    """Load database credentials from a .env file."""
+    load_dotenv(env_path)
+    return {
+        "user": os.getenv("POSTGRES_USER", "postgres"),
+        "password": os.getenv("POSTGRES_PASSWORD", ""),
+    }
+
+
+def get_sqlalchemy_engine(db_creds):
+    """Create a SQLAlchemy engine for PostgreSQL."""
+    url = f"postgresql+psycopg2://{db_creds['user']}:{db_creds['password']}@database/batch"
+    return create_engine(url)
+
+
+def save_to_postgres(df, db_creds, table_name="stroke_predictions"):
+    """Save the DataFrame to a PostgreSQL database."""
+    engine = get_sqlalchemy_engine(db_creds)
+    create_table_sql = f"""
+    CREATE TABLE IF NOT EXISTS {table_name} (
+        id SERIAL PRIMARY KEY,
+        input_id VARCHAR(64),
+        gender INT,
+        age FLOAT,
+        hypertension INT,
+        heart_disease INT,
+        ever_married INT,
+        work_type INT,
+        Residence_type INT,
+        avg_glucose_level FLOAT,
+        bmi FLOAT,
+        smoking_status INT,
+        stroke INT,
+        stroke_pred INT,
+        model_id VARCHAR(64)
+    );
+    """
+    with engine.begin() as conn:
+        conn.execute(text(create_table_sql))
+        for _, row in df.iterrows():
+            conn.execute(
+                text(
+                    f"""
+                    INSERT INTO {table_name} (
+                        input_id, gender, age, hypertension, heart_disease, ever_married, work_type, Residence_type,
+                        avg_glucose_level, bmi, smoking_status, stroke, stroke_pred, model_id
+                    ) VALUES (
+                        :input_id, :gender, :age, :hypertension, :heart_disease, :ever_married, :work_type, :Residence_type,
+                        :avg_glucose_level, :bmi, :smoking_status, :stroke, :stroke_pred, :model_id
+                    )
+                """
+                ),
+                {
+                    "input_id": str(row.get("id", "")),
+                    "gender": int(row["gender"]),
+                    "age": float(row["age"]),
+                    "hypertension": int(row["hypertension"]),
+                    "heart_disease": int(row["heart_disease"]),
+                    "ever_married": int(row["ever_married"]),
+                    "work_type": int(row["work_type"]),
+                    "Residence_type": int(row["Residence_type"]),
+                    "avg_glucose_level": float(row["avg_glucose_level"]),
+                    "bmi": float(row["bmi"]),
+                    "smoking_status": int(row["smoking_status"]),
+                    "stroke": int(row.get("stroke", -1)),
+                    "stroke_pred": int(row["stroke_pred"]),
+                    "model_id": str(row["model_id"]),
+                },
+            )
+
+
 @flow
 def run_batch(
-    input_file: str, output_dir: str = "./batch-output", model_dir: str = "./models"
+    input_file: str,
+    env_path: str = ".env",
+    model_dir: str = "./models",
+    table_name: str = "stroke_predictions",
 ):
     """Main function to run the batch prediction."""
     model = load_model()
@@ -121,14 +197,13 @@ def run_batch(
 
     df_result["model_id"] = model.metadata.run_id
 
-    print("...saving dataframe")
+    print("...loading DB credentials from .env")
+    db_creds = load_db_credentials_from_env(env_path)
 
-    os.makedirs(output_dir, exist_ok=True)
-    output_path = os.path.join(
-        output_dir, f"stroke_predictions_{model.metadata.run_id}.csv"
-    )
-    print(f"...saving dataframe to: {output_path}")
-    df_result.to_csv(output_path, index=False)
+    print("...saving to postgres")
+    save_to_postgres(df_result, db_creds, table_name=table_name)
+
+    print("...done")
 
 
 if __name__ == "__main__":
@@ -136,7 +211,8 @@ if __name__ == "__main__":
         name="batch-predict",
         parameters={
             "input_file": "./data/stroke-data-2.csv",
-            "output_dir": "./batch-output",
+            "env_path": ".env",
             "model_dir": "./models",
+            "table_name": "stroke_predictions_2",
         },
     )

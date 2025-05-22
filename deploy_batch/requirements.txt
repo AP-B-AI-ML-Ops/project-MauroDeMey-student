@@ -1,3 +1,4 @@
 mlflow
 pandas
 prefect
+psycopg2-binary
