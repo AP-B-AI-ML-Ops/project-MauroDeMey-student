@@ -1,11 +1,11 @@
 """Main entry point for the ML pipeline."""
 
-from hpo import run_optimization
 from prefect import flow
-from preprocess import run_data_prep
-from register import run_register_model
 
-from train import run_train
+from train.hpo import run_optimization
+from train.preprocess import run_data_prep
+from train.register import run_register_model
+from train.train import run_train
 
 
 @flow
@@ -37,7 +37,7 @@ def main_flow(
 
 if __name__ == "__main__":
     main_flow.serve(
-        name="main-flow",
+        name="train-flow",
         parameters={
             "input_file": "./data/healthcare-dataset-stroke-data.csv",
             "test_size": 0.2,
