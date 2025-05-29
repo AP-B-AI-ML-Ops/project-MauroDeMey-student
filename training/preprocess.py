@@ -46,6 +46,8 @@ def preprocess(df: pd.DataFrame, ss: StandardScaler, le: LabelEncoder, output_di
     numerical_columns = ["age", "avg_glucose_level", "bmi"]
     df[numerical_columns] = ss.fit_transform(df[numerical_columns])
 
+    dump_pickle(ss, os.path.join(output_dir, "scaler.pkl"))
+
     return df, ss, le
 
 
