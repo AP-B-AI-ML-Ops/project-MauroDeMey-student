@@ -2,7 +2,7 @@
 
 import pickle
 
-from train.register import load_pickle
+from training.register import load_pickle
 
 
 def test_load_pickle(tmp_path):

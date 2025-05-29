@@ -5,7 +5,7 @@ import tempfile
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 
-from train.preprocess import preprocess, read_dataframe
+from training.preprocess import preprocess, read_dataframe
 
 
 def test_read_dataframe(tmp_path):

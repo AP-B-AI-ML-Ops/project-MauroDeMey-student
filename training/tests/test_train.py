@@ -5,7 +5,7 @@ import pickle
 
 import numpy as np
 
-from train.train import run_train
+from training.train import run_train
 
 
 def test_run_train(tmp_path):
